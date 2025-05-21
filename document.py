@@ -316,38 +316,23 @@ def filter_detected_cells(cells):
 
 # Combine all translated pages into a final PDF
 def combine_pages_into_pdf(translated_pages, image_streams_list):
-    """
-    Combine pages with translated text and images into a final PDF (in memory).
-    
-    :param translated_pages: List of pages with translated text.
-    :param image_streams_list: List of in-memory image streams (BytesIO) corresponding to each page's image.
-                               Elements can be None if no image for that page.
-    :return: PDF as a BytesIO stream.
-    """
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Add font once
     pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
     pdf.set_font("DejaVu", size=12)
 
     for page_num, page_content in enumerate(translated_pages):
         pdf.add_page()
-
-        # Join list to string if needed
         if isinstance(page_content, list):
             page_content = "\n".join(page_content)
-
         pdf.multi_cell(0, 10, page_content)
 
-        # Check if image exists and is valid (not None or empty)
         if page_num < len(image_streams_list):
             image_stream = image_streams_list[page_num]
-
             if image_stream is not None:
                 try:
                     pil_image = PILImage.open(image_stream)
-
                     with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_img_file:
                         pil_image.save(tmp_img_file.name)
                         tmp_img_path = tmp_img_file.name
@@ -359,11 +344,20 @@ def combine_pages_into_pdf(translated_pages, image_streams_list):
                 except Exception as e:
                     print(f"Skipping image for page {page_num} due to error: {e}")
 
-    pdf_output = BytesIO()
-    pdf.output(pdf_output)
-    pdf_output.seek(0)
+    # Write PDF to a temporary file, then load into BytesIO
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf_file:
+        pdf.output(temp_pdf_file.name)
+        temp_pdf_file.seek(0)
+        pdf_output = BytesIO(temp_pdf_file.read())
 
-    return pdf_output  
+    # Clean up temp PDF file
+    try:
+        os.remove(temp_pdf_file.name)
+    except Exception as e:
+        print(f"Warning: Could not delete temp PDF file: {e}")
+
+    pdf_output.seek(0)
+    return pdf_output
     # return pdf  # Return the PDF as a BytesIO stream
 def replace_image_in_text(text, image_streams):
     """
