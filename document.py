@@ -30,9 +30,9 @@ os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata/"
 blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=translatepdf;AccountKey=ElInSAO52198hJaZW9bp5olaKtAdme66HyGb82j/0PgFX2ufhpnRN3iVZ/fbaqqjhZuBj8xChOB6+AStG4vrzA==;EndpointSuffix=core.windows.net")
 russian_container = "russiandocs"
 english_container = "englishtranslateddoc"
-api_key = os.getenv("AZURE_OPENAI_API_KEY")
-endpoint = os.getenv("AZURE_OPENAI_ENDPOINT")
-deployment = os.getenv("AZURE_OPENAI_DEPLOYMENT")
+api_key = st.secrets["general"]["AZURE_OPENAI_API_KEY"]
+endpoint = st.secrets["general"]["AZURE_OPENAI_ENDPOINT"]
+deployment_name = st.secrets["general"]["AZURE_OPENAI_DEPLOYMENT_NAME"]
 # Initialize LangChain LLM
 def llm(russian_text: str) -> str:
     client = AzureOpenAI(
