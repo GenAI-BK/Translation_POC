@@ -1,2 +1,5 @@
 tesseract-ocr
 tesseract-ocr-por
+tesseract-ocr-rus
+tesseract-ocr-fra
+tesseract-ocr-spa
