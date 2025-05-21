@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: streamlit-app
+    env: python
+    apt_packages:
+      - tesseract-ocr
+    build_command: pip install -r requirements.txt
+    start_command: streamlit run frontend.py --server.port $PORT
