@@ -320,57 +320,50 @@ def combine_pages_into_pdf(translated_pages, image_streams_list):
     Combine pages with translated text and images into a final PDF (in memory).
     
     :param translated_pages: List of pages with translated text.
-    :param image_streams_list: List of in-memory image streams corresponding to each page's image.
+    :param image_streams_list: List of in-memory image streams (BytesIO) corresponding to each page's image.
+                               Elements can be None if no image for that page.
     :return: PDF as a BytesIO stream.
     """
     pdf = FPDF()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    # Loop through each translated page and image
+    # Add font once
+    pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
+    pdf.set_font("DejaVu", size=12)
+
     for page_num, page_content in enumerate(translated_pages):
-        pdf.add_page()  # Add a new page for each item
-        
-         # Add a Unicode font, Arial Unicode MS for example
-        pdf.add_font("DejaVu", "", "DejaVuSans.ttf", uni=True)
-        pdf.set_font("DejaVu", size=12)
-        # If page_content is a list, join it into a single string
+        pdf.add_page()
+
+        # Join list to string if needed
         if isinstance(page_content, list):
-            page_content = "\n".join(page_content)  # Join list into a single string
-        
-        pdf.multi_cell(0, 10, page_content)  # Add text from each page
-        
-        # If there's an image stream for this page, insert it
+            page_content = "\n".join(page_content)
+
+        pdf.multi_cell(0, 10, page_content)
+
+        # Check if image exists and is valid (not None or empty)
         if page_num < len(image_streams_list):
-            image_stream = image_streams_list[page_num]  # Get the in-memory image stream (BytesIO)
-            
-            # Convert the in-memory image (BytesIO) to a PIL image
-            pil_image = PILImage.open(image_stream)
+            image_stream = image_streams_list[page_num]
 
-            # Save the PIL image to a temporary file (necessary for FPDF)
-            temp_img_path = "temp_image.png"
-            pil_image.save(temp_img_path)
+            if image_stream is not None:
+                try:
+                    pil_image = PILImage.open(image_stream)
 
-            # Add the image to the PDF
-            pdf.image(temp_img_path, x=10, y=pdf.get_y(), w=100)  # Adjust x, y, w for image placement
-            pdf.ln(50)  # Move to next line after inserting the image
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as tmp_img_file:
+                        pil_image.save(tmp_img_file.name)
+                        tmp_img_path = tmp_img_file.name
 
-            # Optionally, remove the temporary image file
-            os.remove(temp_img_path)
+                    pdf.image(tmp_img_path, x=10, y=pdf.get_y(), w=100)
+                    pdf.ln(50)
 
-    
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf_file:
-        pdf.output(temp_pdf_file.name)  # Write the PDF to the temporary file path
-        
-        # Rewind the file pointer to the beginning of the temporary file
-        temp_pdf_file.seek(0)
-        
-        # Create a BytesIO object and read the temporary file content into it
-        pdf_output = BytesIO(temp_pdf_file.read())
-    
-    # Optionally, remove the temporary file
-    # os.remove(temp_pdf_file.name)
+                    os.remove(tmp_img_path)
+                except Exception as e:
+                    print(f"Skipping image for page {page_num} due to error: {e}")
 
-    return pdf_output    
+    pdf_output = BytesIO()
+    pdf.output(pdf_output)
+    pdf_output.seek(0)
+
+    return pdf_output  
     # return pdf  # Return the PDF as a BytesIO stream
 def replace_image_in_text(text, image_streams):
     """
