@@ -24,7 +24,7 @@ import io
 import streamlit as st
 # Set up environment for Tesseract and LangChain
 
-os.environ["TESSDATA_PREFIX"] = "tessdata/"
+os.environ["TESSDATA_PREFIX"] = "/usr/share/tesseract-ocr/4.00/tessdata/"
 
 # Azure Blob Storage setup
 blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=translatepdf;AccountKey=ElInSAO52198hJaZW9bp5olaKtAdme66HyGb82j/0PgFX2ufhpnRN3iVZ/fbaqqjhZuBj8xChOB6+AStG4vrzA==;EndpointSuffix=core.windows.net")
