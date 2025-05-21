@@ -58,7 +58,7 @@ nibabel
 nipype
 numpy
 openai
-opencv-python
+opencv-python-headless
 orjson
 packaging
 pandas
