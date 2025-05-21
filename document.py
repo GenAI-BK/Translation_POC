@@ -23,6 +23,7 @@ from PIL import Image
 import io
 import streamlit as st
 # Set up environment for Tesseract and LangChain
+pytesseract.pytesseract.tesseract_cmd = r"Tesseract-OCR/tesseract.exe"
 
 # Azure Blob Storage setup
 blob_service_client = BlobServiceClient.from_connection_string("DefaultEndpointsProtocol=https;AccountName=translatepdf;AccountKey=ElInSAO52198hJaZW9bp5olaKtAdme66HyGb82j/0PgFX2ufhpnRN3iVZ/fbaqqjhZuBj8xChOB6+AStG4vrzA==;EndpointSuffix=core.windows.net")
