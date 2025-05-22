@@ -34,15 +34,15 @@ api_key = st.secrets["general"]["AZURE_OPENAI_API_KEY"]
 endpoint = st.secrets["general"]["AZURE_OPENAI_ENDPOINT"]
 deployment_name = st.secrets["general"]["AZURE_OPENAI_DEPLOYMENT_NAME"]
 # Initialize LangChain LLM
-def llm(russian_text: str) -> str:
+def llm(text,language) -> str:
     client = AzureOpenAI(
             api_key =api_key ,  
             api_version = "2025-01-01-preview",
             azure_endpoint = endpoint
             )
     prompt = (
-        f"You will be provided with a text in Russian: \"{russian_text}\". "
-        "This text is mainly about weapons and military hardware. "
+        f"You will be provided with a text in {language}: \"{text}\". "
+        
         "Translate it into English while maintaining spaces, new lines, and structure."
     )
 
@@ -88,7 +88,7 @@ def upload_pdf_to_blob(pdf_data: BytesIO, container_name: str, blob_name: str):
     return f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_name}"
 
 # Processing and translating text from OCR
-def process_and_translate(ocr_text, ocr_data):
+def process_and_translate(ocr_text, ocr_data,language):
     empty_count = 0
     previous_text = ""
     table_placeholder_added = False  # To track if {table} placeholder has been added
@@ -108,7 +108,7 @@ def process_and_translate(ocr_text, ocr_data):
     if empty_count >= 5 and not table_placeholder_added:
         ocr_text = ocr_text.replace(previous_text, f"{previous_text} {{image}}", 1)
 
-    answer = llm(ocr_text)
+    answer = llm(ocr_text,language)
     return answer
 
 # Translate batch of words
@@ -414,8 +414,20 @@ def process_pdf_and_translate(pdf_data,selected_lang_code,zoomlevel=4):
         # Perform OCR on the image
         ocr_text = pytesseract.image_to_string(image, lang=selected_lang_code)
         ocr_data= pytesseract.image_to_data(image, lang=selected_lang_code,output_type=pytesseract.Output.DICT)
+        if selected_lang_code == 'eng':
+            language = 'English'
+        elif selected_lang_code == 'fra':
+            language = 'French'
+        elif selected_lang_code == 'jpn':
+            language = 'Japanese'
+        elif selected_lang_code == 'rus':
+            language = 'Russian'
+        elif selected_lang_code == 'spa':
+            language = 'Spanish'
+        else:
+            language = 'Unknown'
         # Process and translate text (both normal text and tables)
-        translated_text = process_and_translate(ocr_text,ocr_data)
+        translated_text = process_and_translate(ocr_text,ocr_data,language)
         # Step 2: Extract images from empty regions
         extracted_image_lst = []
         extracted_image = image_extraction(ocr_data,image,image_width)  # Extract image regions
