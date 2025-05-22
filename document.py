@@ -49,7 +49,7 @@ def llm(text,language) -> str:
     response = client.chat.completions.create(
         model=deployment_name,  # your Azure deployment name here
         messages=[
-            {"role": "system", "content": "You are a military expert translator."},
+            {"role": "system", "content": "You are an expert translator."},
             {"role": "user", "content": prompt},
         ]
     )
