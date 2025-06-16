@@ -8,7 +8,8 @@ def main():
         'fra': 'French',
         'jpn': 'Japanese',
         'rus': 'Russian',
-        'spa': 'Spanish'
+        'spa': 'Spanish',
+        'heb': 'Hebrew'
     }
 
     selected_lang_code = st.selectbox(
