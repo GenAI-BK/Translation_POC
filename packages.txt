@@ -4,5 +4,6 @@ tesseract-ocr-rus
 tesseract-ocr-fra
 tesseract-ocr-spa
 tesseract-ocr-jpn
+tesseract-ocr-heb
 
 
